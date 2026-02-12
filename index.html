@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Class Chat</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            display: flex;
+            height: 100vh;
+            background: #f0f2f5;
+        }
+
+        .users {
+            width: 25%;
+            background: white;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .user {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .user:hover {
+            background: #e4e6eb;
+        }
+
+        .user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat {
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .message img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .bubble {
+            background: #3897f0;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+        }
+
+        footer {
+            display: flex;
+            padding: 10px;
+            background: white;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px 18px;
+            border-radius: 20px;
+            border: none;
+            background: #3897f0;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="users">
+    <h3>Online Users</h3>
+    <div id="userList"></div>
+</div>
+
+<div class="chat">
+    <div id="messages">
+
+        <!-- LOAD OLD MESSAGES FROM DATABASE -->
+        {% for msg in messages %}
+            <div class="message">
+                <img src="/static/uploads/{{ msg['profile_image'] if msg['sender'] == session['username'] else '' }}">
+                <div class="bubble">
+                    <strong>{{ msg['sender'] }}:</strong>
+                    {{ msg['message'] }}
+                    <small style="font-size:10px;">
+                        {{ msg['timestamp'] }}
+                    </small>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <footer>
+        <input id="message" placeholder="Type message...">
+        <button onclick="send()">Send</button>
+    </footer>
+</div>
+
+<script>
+    const socket = io();
+    let selectedUser = null;
+
+    socket.on("online_users", users => {
+        const list = document.getElementById("userList");
+        list.innerHTML = "";
+
+        users.forEach(user => {
+            const div = document.createElement("div");
+            div.className = "user";
+
+            div.innerHTML = `
+                <img src="/static/uploads/${user.profile || 'default.png'}">
+                ${user.username}
+            `;
+
+            div.onclick = () => {
+                selectedUser = user.username;
+                document.getElementById("messages").innerHTML = "";
+            };
+
+            list.appendChild(div);
+        });
+    });
+
+    function send() {
+        const input = document.getElementById("message");
+
+        if (!selectedUser || input.value === "") return;
+
+        socket.emit("private_message", {
+            to: selectedUser,
+            message: input.value
+        });
+
+        input.value = "";
+    }
+
+    socket.on("receive_private", data => {
+        const msg = document.createElement("div");
+        msg.className = "message";
+
+        msg.innerHTML = `
+            <img src="/static/uploads/${data.profile || 'default.png'}">
+            <div class="bubble">
+                <strong>${data.from}:</strong>
+                ${data.message}
+            </div>
+        `;
+
+        document.getElementById("messages").appendChild(msg);
+    });
+</script>
+
+</body>
+</html>
+
+

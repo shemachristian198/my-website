@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #50add7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: rgb(130, 212, 224);
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #2ab765;
+        }
+
+        button {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: #3897f0;
+            color: white;
+        }
+
+        a {
+            text-align: center;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="center">
+    <div class="card">
+        <h2>Create Account</h2>
+        <form method="POST">
+            <input name="username" placeholder="Username" required>
+            <input name="password" type="password" placeholder="Password" required>
+            <button>Register</button>
+        </form>
+        <p>Already have account? <a href="/login">Login</a></p>
+    </div>
+</body>
+</html>
